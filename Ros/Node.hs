@@ -89,13 +89,20 @@ subscribe name = do n <- get
                     when (M.member name' subs) 
                          (error $ "Already subscribed to "++name')
                     let pubs = publications n
-                    (stream, sub) <- liftIO $ runReaderT (mkSub name') r
-                    put n { subscriptions = M.insert name' sub subs }
-                    t <- liftIO $ share stream
+                    -- PROBLEM: Can we subscribe to a topic such that 
+                    -- we get locally produced data *and* remote data?
+
+                    --(stream, sub) <- liftIO $ runReaderT (mkSub name') r
+                    --put n { subscriptions = M.insert name' sub subs }
+                    --t <- liftIO $ share stream
                     if M.member name' pubs
                        then let t' = fromDynErr . pubTopic $ pubs M.! name'
-                            in return $ merge t t'
-                       else return t
+                            in return t'
+                            --in return $ merge t t'
+                       else do (stream, sub) <- liftIO $ runReaderT (mkSub name') r
+                               put n { subscriptions = M.insert name' sub subs }
+                               liftIO $ share stream
+                               --return t
   where fromDynErr = maybe (error msg) id . fromDynamic
         msg = "Subscription to "++name++" at a different type than "++
               "what that Topic was already advertised at by this Node."
