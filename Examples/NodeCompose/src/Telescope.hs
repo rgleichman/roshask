@@ -40,4 +40,4 @@ images = repeatM (mkImage `fmap` orbitPt width height)
         mkImage = Image header (fi width) (fi height) "mono8" 0 (fi width)
 
 telescope :: Node ()
-telescope = advertise "video" $ (topicRate 60 (runTopicState' images 0))
+telescope = advertise "video" $ (topicRate 30 (runTopicState' images 0))

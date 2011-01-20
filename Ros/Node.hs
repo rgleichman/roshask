@@ -31,7 +31,7 @@ import Ros.TopicStats (recvMessageStat, sendMessageStat)
 import Ros.Util.AppConfig (Config, parseAppConfig, forkConfig, configured)
 import Ros.Util.ArgRemapping
 import Ros.Topic
-import Ros.TopicUtil (topicRate, share)
+import Ros.TopicUtil (topicRate, share, merge)
 import Ros.Core.RosTime
 
 -- |Maximum number of items to buffer for a subscriber.
@@ -89,13 +89,13 @@ subscribe name = do n <- get
                     when (M.member name' subs) 
                          (error $ "Already subscribed to "++name')
                     let pubs = publications n
+                    (stream, sub) <- liftIO $ runReaderT (mkSub name') r
+                    put n { subscriptions = M.insert name' sub subs }
+                    t <- liftIO $ share stream
                     if M.member name' pubs
-                      then return . fromDynErr . pubTopic $ pubs M.! name'
-                      else do (stream, sub) <- liftIO $
-                                               runReaderT (mkSub name') r
-                              put n { subscriptions = M.insert name' sub subs }
-                              --return stream
-                              liftIO $ share stream
+                       then let t' = fromDynErr . pubTopic $ pubs M.! name'
+                            in return $ merge t t'
+                       else return t
   where fromDynErr = maybe (error msg) id . fromDynamic
         msg = "Subscription to "++name++" at a different type than "++
               "what that Topic was already advertised at by this Node."
