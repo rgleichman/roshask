@@ -73,11 +73,11 @@ buildNewPkgMsgs fname =
                       . takeFileName)
                      pkgMsgs
          gen = generateMsgType pkgHier pkgMsgs'
-     parsed <- liftIO $ checkErrors <$> mapM parseMsg pkgMsgs
+     parsed <- liftIO $ rights <$> mapM parseMsg pkgMsgs
      mapM_ (\(n, m) -> gen m >>= liftIO . B.writeFile n) (zip names parsed)
      liftIO $ do f <- hasMsgs fname
                  when f (removeOldCabal fname >> compileMsgs)
-    where err pkg = error $ "Couldn't parse message " ++ pkg
+    where err pkg = error $ "Couldn't parse messages WHOOP! " ++ pkg
           pkgName = pathToRosPkg fname
           pkgHier = B.pack $ "Ros." ++ cap pkgName ++ "."
           isLeft (Left _) = True
