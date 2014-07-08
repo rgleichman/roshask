@@ -87,9 +87,12 @@ constParsers = map (uncurry constParser . swap) simpleFieldAssoc
 -- spaces. For strings, we take the whole line (so comments aren't
 -- stripped).
 sanitizeConstants :: (a, MsgType, ByteString) -> (a, MsgType, ByteString)
-sanitizeConstants (name, RString, val) = 
-    (name, RString, B.concat ["\"", escapeQuotes val,"\""])
-  where escapeQuotes = B.intercalate "\\\"" . B.split '"'
+sanitizeConstants x@(_, RString, _) = x
+--sanitizeConstants (name, RString, val) = 
+--    (name, RString, B.concat ["\"", escapeQuotes val,"\""])
+--    (name, RString, val)
+--    where escapeQuotes = id
+--  where escapeQuotes = B.intercalate "\\\"" . B.split '"'
 sanitizeConstants (name, t, val) = 
     (name, t, B.takeWhile (\c -> c /= '#' && not (isSpace c)) val)
 
