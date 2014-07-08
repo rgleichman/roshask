@@ -64,7 +64,7 @@ negotiatePub ttype md5 sock =
        when (not wildCard) 
             (case lookup "md5sum" connHeader of
                Just s | s == md5 -> return ()
-                      | otherwise -> error "Disagreement on Topic type MD5"
+                      | otherwise -> error $ "Disagreement on Topic type MD5" ++ "s is " ++ (show s) ++ " md5 is " ++ (show md5)
                Nothing -> error $ "Client did not include MD5 sum "++
                                   "in its request.")
        case lookup "tcp_nodelay" connHeader of
