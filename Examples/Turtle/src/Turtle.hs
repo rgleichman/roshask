@@ -3,26 +3,30 @@ module Turtle (main) where
 import Data.Complex
 import Ros.Node
 import Ros.Topic (cons, repeatM)
-import Ros.TopicUtil (tee, filterBy, everyNew, interruptible, gate, share)
+import Ros.Topic.Util (tee, filterBy, everyNew, interruptible, gate)
 import Ros.Turtlesim.Pose
 import Ros.Turtlesim.Velocity
 import Ros.Logging
 import System.IO (hFlush, stdout)
+
+-- Setup: rosrun turtlesim turtlesim_node
 
 -- A type synonym for a 2D point.
 type Point = Complex Float
 
 -- A Topic of user-supplied waypoint trajectories.
 getTraj :: Topic IO [Point]
-getTraj = repeatM (do putStr "Enter waypoints: " >> hFlush stdout
+getTraj = repeatM (do putStr "Enter waypoints in the form [(x1,y1), (x2,y2) ... ]: " >> hFlush stdout
                       $(logInfo "Waiting for new traj")
                       (map (uncurry (:+)) . read) `fmap` getLine)
 
+wrapAngle :: (Floating a, Ord a) => a -> a
 wrapAngle theta 
   | theta < 0    = theta + 2 * pi
   | theta > 2*pi = theta - 2 * pi
   | otherwise    = theta
 
+angleDiff :: (Floating a, Ord a) => a -> a -> a
 angleDiff x y = wrapAngle (x' + pi - y') - pi
   where x' = if x < 0 then x + 2*pi else x
         y' = if y < 0 then y + 2*pi else y
@@ -41,6 +45,7 @@ navigate (goal, pos) = Velocity (min 2 (magnitude v)) angVel
         thetaErr = (angleDiff (phase v) (theta pos)) * (180 / pi)
         angVel   = signum thetaErr * (min 2 (abs thetaErr))
 
+main :: IO ()
 main = runNode "HaskellBTurtle" $
        do enableLogging (Just Warn)
           poses <- subscribe "/turtle1/pose"

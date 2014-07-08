@@ -7,7 +7,7 @@ import Data.Complex
 import AngleNum
 import Ros.Node
 import Ros.Topic (repeatM, force, dropWhile, metamorphM, yieldM)
-import Ros.TopicUtil (everyNew, interruptible)
+import Ros.Topic.Util (everyNew, interruptible)
 import Ros.Turtlesim.Pose
 import Ros.Turtlesim.Velocity
 import Ros.Logging
