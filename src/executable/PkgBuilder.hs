@@ -129,6 +129,7 @@ buildNewPkgMsgs tools fname =
                             Just i -> err (pkgMsgs !! i)
          names = map ((destDir </>)
                       . flip replaceExtension ".hs"
+                      . cap
                       . takeFileName)
                      pkgMsgs
          gen = generateMsgType pkgHier pkgMsgs'
@@ -203,6 +204,7 @@ genMsgCabal pkgPath pkgName =
                   , "  Build-Depends:   base >= 4.2 && < 6,"
                   , "                   vector > 0.7,"
                   , "                   time >= 1.1,"
+                  , "                   data-default-generics >= 0.3,"
                   , B.concat [ "                   roshask == "
                              , roshaskMajorMinor
                              , if null deps then ""  else "," ]
