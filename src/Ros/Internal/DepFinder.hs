@@ -3,7 +3,8 @@
 module Ros.Internal.DepFinder (findPackageDeps, findPackageDepNames, 
                                findPackageDepsTrans,
                                findMessages, findMessage, findMessagesInPkg,
-                               findDepsWithMessages, hasMsgs
+                               findDepsWithMessages, hasMsgs,
+                               findServices
                               ) where
 import Control.Applicative ((<$>))
 import Control.Monad (when, filterM)
@@ -66,7 +67,7 @@ getRosPaths =
 --TODO: should std_srvs be removed from this list?
 ignoredPackages :: [String]
 ignoredPackages = ["genmsg_cpp", "rospack", "rosconsole", "rosbagmigration", 
-                   "roscpp", "rospy", "roslisp", "std_srvs", "roslib", "boost"]
+                   "roscpp", "rospy", "roslisp", "roslib", "boost"]
 
 -- |Find the names of the ROS packages this package depends on as
 -- indicated by the manifest.xml or package.xml file in this package's root
@@ -152,6 +153,13 @@ findMessages pkgRoot =
   do e <- doesDirectoryExist dir
      if e then F.find (depth <? 1) (extension ==? ".msg") dir else return []
   where dir = pkgRoot </> "msg"
+        
+--TODO: refactor with findMessages
+findServices :: FilePath -> IO [FilePath]
+findServices pkgRoot =
+  do e <- doesDirectoryExist dir
+     if e then F.find (depth <? 1) (extension ==? ".srv") dir else return []
+  where dir = pkgRoot </> "srv"
 
 -- |Find all message definition files in a ROS package. Returns the
 -- 'FilePath' to the package, and the 'FilePath' to each message

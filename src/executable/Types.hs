@@ -4,7 +4,8 @@ module Types (MsgType(..), MsgField(..), MsgConst(..),
               MsgName, msgName, requestMsgName, responseMsgName,
               shortName, rawName, fullRosMsgName,
               fullRosSrvName,
-              Msg(..), hasHeader, Srv(..)) where
+              Msg(..), hasHeader, Srv(..),
+              requestResponseNames) where
 import Data.ByteString.Char8 (ByteString)
 import Data.Char (toUpper)
 
@@ -91,3 +92,9 @@ data Srv = Srv { srvName :: MsgName
 instance Show Srv where
   show (Srv name package _ req res) =
     unwords ["Srv", show name, show package, show req, show res]
+
+requestResponseNames :: Srv -> [String]
+requestResponseNames srv = [reqName, resName]
+  where
+    reqName = shortName . srvRequest $ srv
+    resName = shortName . srvResponse $ srv
