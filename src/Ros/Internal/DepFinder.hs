@@ -24,7 +24,7 @@ findPackagePath :: [FilePath] -> Package -> Maybe FilePath
 findPackagePath search pkg = find ((== pkg) . last . splitPath) search
 
 -- Get the packages listed as dependencies in an XML manifest.  NOTE:
--- In version 1.3.7, the xml package gained the ability to work with
+-- In version 1.3.7, the "xml" package gained the ability to work with
 -- ByteStrings via the XmlSource typeclass. Consider that upgrade if
 -- performance is causing trouble.
 getPackages :: String -> Maybe [Package]
@@ -63,12 +63,13 @@ getRosPaths =
 
 -- Packages that we will ignore for tracking down message definition
 -- dependencies.
+--TODO: should std_srvs be removed from this list?
 ignoredPackages :: [String]
 ignoredPackages = ["genmsg_cpp", "rospack", "rosconsole", "rosbagmigration", 
                    "roscpp", "rospy", "roslisp", "std_srvs", "roslib", "boost"]
 
 -- |Find the names of the ROS packages this package depends on as
--- indicated by the manifest.xml file in this package's root
+-- indicated by the manifest.xml or package.xml file in this package's root
 -- directory.
 findPackageDepNames :: FilePath -> IO [String]
 findPackageDepNames pkgRoot = 
@@ -128,6 +129,8 @@ findPackageDeps pkgRoot =
 -- root directories of the dependencies, and so on.
 findPackageDepsTrans :: FilePath -> IO [FilePath]
 findPackageDepsTrans pkgRoot =
+  -- searchPaths is a list of all directories on the ROS package path that have
+  -- either a manifest.xml(rosbuild), or a package.xml(new replacement for manifest.xml)
   do searchPaths <- getRosPaths
      let getDeps pkg = 
            do pkgDeps <- findPackageDepNames pkg

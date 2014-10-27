@@ -105,8 +105,8 @@ packageRegistered tools pkg =
                    "-" ++ B.unpack roshaskVersion
         getList = myReadProcess $ ghcPkg tools ["list", cabalPkg]
 
--- | Build all messages defined by a package unless that package is
--- already registered with ghc-pkg.
+-- | Build all messages defined by a ROS package unless the corresponding
+-- Haskell package is already registered with ghc-pkg.
 buildPkgMsgs :: FilePath -> MsgInfo ()
 buildPkgMsgs fname = do tools <- liftIO $ toolPaths
                         r <- liftIO $ packageRegistered tools fname
@@ -123,6 +123,7 @@ buildNewPkgMsgs tools fname =
      destDir <- liftIO $ codeGenDir fname
      liftIO $ createDirectoryIfMissing True destDir
      pkgMsgs <- liftIO $ findMessages fname
+     --TODO: find services
      let pkgMsgs' = map (B.pack . cap . dropExtension . takeFileName) pkgMsgs
          checkErrors xs = case findIndex isLeft xs of
                             Nothing -> rights xs
@@ -133,7 +134,12 @@ buildNewPkgMsgs tools fname =
                       . takeFileName)
                      pkgMsgs
          gen = generateMsgType pkgHier pkgMsgs'
+         --TODO: make pkgSrvs'
+         --TODO: make srvNames
+         --TODO: make srvGen
+     --TODO: parse services
      parsed <- liftIO $ checkErrors <$> mapM parseMsg pkgMsgs
+     --TODO: call srvGen and write the file
      mapM_ (\(n, m) -> gen m >>= liftIO . B.writeFile n) (zip names parsed)
      liftIO $ do f <- hasMsgs fname
                  when f (removeOldCabal fname >> compileMsgs)
@@ -179,6 +185,7 @@ getHaskellMsgFiles pkgPath _pkgName = do
   map (d </>) . filter ((== ".hs") . takeExtension) <$> getDirectoryContents d
 
 -- Generate a .cabal file to build this ROS package's messages.
+-- TODO: add service files
 genMsgCabal :: FilePath -> String -> IO FilePath
 genMsgCabal pkgPath pkgName = 
   do deps' <- map (B.pack . rosPkg2CabalPkg) <$> 
@@ -189,6 +196,7 @@ genMsgCabal pkgPath pkgName =
      let deps
            | pkgName == "std_msgs" = deps'
            | otherwise = nub ("ROS-std-msgs":deps')
+     --TODO: srvFiles
      msgFiles <- getHaskellMsgFiles pkgPath pkgName
      let msgModules = map (B.pack . path2MsgModule) msgFiles
          target = B.intercalate "\n" $

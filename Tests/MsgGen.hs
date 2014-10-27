@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 module MsgGen where
-import Analysis (addMsg)
 import Control.Applicative
 import Control.Monad (zipWithM)
 import Control.Monad.IO.Class
@@ -15,7 +14,6 @@ import Ros.Internal.DepFinder (findMessages)
 import System.FilePath ((</>), dropExtension, takeFileName)
 import Test.Tasty
 import Test.Tasty.HUnit
-import Types(srvRequest, srvResponse)
 
 -- CONSTANTS
 
@@ -54,7 +52,6 @@ testGeneratedHaskell :: B.ByteString -> [FilePath] -> [FilePath] -> [B.ByteStrin
 testGeneratedHaskell packagePath msgPaths haskellPaths pkgMsgs =
   do msgs <- liftIO $ mapM (fmap (either error id) . parseMsg) msgPaths
      golds <- liftIO $ mapM B.readFile haskellPaths
-     mapM_ addMsg msgs
      gens <- mapM (generateMsgType packagePath pkgMsgs) msgs
      return $ testGroup "Generated Haskell" $ zipWith3
        (\name gold gen -> testCase name $ gold @=? gen) msgPaths golds gens
@@ -65,9 +62,6 @@ testGeneratedService packagePath srvPath requestGolden responseGolden pkgMsgs =
   do srv <- liftIO $
             either error id <$> parseSrv srvPath
      golds <- liftIO $ mapM B.readFile [requestGolden, responseGolden]
-     let requestMsg = srvRequest srv
-         responseMsg = srvResponse srv
-     mapM_ addMsg [requestMsg, responseMsg]
      (request, response) <- generateSrvTypes packagePath pkgMsgs srv
      return $ testGroup "Generated Haskell" $ zipWith3
        (\name gold gen -> testCase name $ gold @=? gen) [srvPath ++" request", srvPath++" response"] golds [request, response]
