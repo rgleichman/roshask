@@ -1,6 +1,8 @@
 module Main where
 import qualified Ros.Test_srvs.AddTwoIntsRequest as Req
 import qualified Ros.Test_srvs.AddTwoIntsResponse as Res
+import Ros.Test_srvs.EmptyRequest
+import Ros.Test_srvs.EmptyResponse
 import Ros.Service (callService)
 import Ros.Service.ServiceTypes
 import Test.Tasty
@@ -22,12 +24,14 @@ import Test.HUnit.Tools
 type Response a = IO (Either ServiceResponseExcept a)
 
 main :: IO ()
-main = defaultMain $ testGroup "Service Tests" [addIntsTest 4 7
-                                               , notOkTest 100 100
-                                               , requestResponseDontMatchTest
-                                               , noProviderTest
-                                               , connectionHeaderBadMD5Test]
-
+main = defaultMain $ testGroup "Service Tests" [
+  addIntsTest 4 7
+  , notOkTest 100 100
+  , requestResponseDontMatchTest
+  , noProviderTest
+  , connectionHeaderBadMD5Test
+  , emptyServiceTest]
+       
 addIntsTest :: GHC.Int.Int64 -> GHC.Int.Int64 -> TestTree
 addIntsTest x y = testCase ("add_two_ints, add " ++ show x ++ " + " ++ show y) $
   do res <- callService "/add_two_ints" Req.AddTwoIntsRequest{Req.a=x, Req.b=y} :: Response  Res.AddTwoIntsResponse
@@ -67,7 +71,13 @@ connectionHeaderBadMD5Test :: TestTree
 connectionHeaderBadMD5Test = testCase "connection header wrong MD5 error" $ 
   do res <- callService "/add_two_ints" $ BadMD5 10 :: Response BadMD5
      Left (ConHeadExcept "Connection header from server has error, connection header is: [(\"error\",\"request from [roshask]: md5sums do not match: [6a2e34150c00229791cc89ff309fff22] vs. [6a2e34150c00229791cc89ff309fff21]\")]") @=? res
-    
+
+emptyServiceTest :: TestTree
+emptyServiceTest =
+  testCase "emptyService" $
+  do res <- callService "/empty_srv" $ EmptyRequest :: Response EmptyResponse
+     Right (EmptyResponse) @=? res
+
 data BadMD5 = BadMD5 {a :: Int.Int64} deriving (Show, Eq)
 
 instance SrvInfo BadMD5 where

@@ -171,6 +171,9 @@ parseSrv fname = do
 
 splitService :: ByteString -> (ByteString, ByteString)
 splitService service = (request, response) where
-  divider = "\n---\n"
+  -- divider does not include newlines to allow it match even
+  -- if there is no request or response message
+  divider = "---"
   (request, dividerAndResponse) = B.breakSubstring divider service
-  response = B.drop (B.length divider) dividerAndResponse
+  --Add 1 to the length of the divider to remove newline
+  response = B.drop (1 + B.length divider) dividerAndResponse

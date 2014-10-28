@@ -42,6 +42,7 @@ import roslib; roslib.load_manifest(PKG)
 
 # import the AddTwoInts service
 from rospy_tutorials.srv import *
+from std_srvs.srv import *
 import rospy 
 
 def add_two_ints(req):
@@ -51,10 +52,14 @@ def add_two_ints(req):
     else:
         return AddTwoIntsResponse(req.a + req.b)
 
+def empty_callback(req):
+    print "Got empty request"
+    return []
+
 def add_two_ints_server():
     rospy.init_node(NAME)
     s = rospy.Service('add_two_ints', AddTwoInts, add_two_ints)
-
+    s2 = rospy.Service('empty_srv', Empty, empty_callback)
     # spin() keeps Python from exiting until node is shutdown
     rospy.spin()
 

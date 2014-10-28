@@ -126,12 +126,25 @@ addTwoIntsGen :: MsgInfo TestTree
 addTwoIntsGen = do
   cachePkg testDir
   genTests <- testGeneratedService "Ros.Test_srvs." srvFile requestFile responseFile []
-  return $ testGroup "Services" [genTests]
+  return $ testGroup "Add Two Ints srv gen" [genTests]
   where
     testDir = "Tests/test_srvs"
     srvFile = "Tests/test_srvs/srv/AddTwoInts.srv"
     requestFile = "Tests/test_srvs/golden/AddTwoIntsRequest.hs"
     responseFile = "Tests/test_srvs/golden/AddTwoIntsResponse.hs"
+
+emptySrv :: MsgInfo TestTree
+emptySrv = do
+  cachePkg testDir
+  genTests <- testGeneratedService "Ros.Test_srvs."srvFile requestFile responseFile []
+  md5Test <- testSrvMD5 srvFile md5
+  return $ testGroup "empty srv gen" [genTests, md5Test]
+  where
+    md5 = "d41d8cd98f00b204e9800998ecf8427e"
+    testDir = "Tests/test_srvs"
+    srvFile = "Tests/test_srvs/srv/Empty.srv"
+    requestFile = "Tests/test_srvs/golden/EmptyRequest.hs"
+    responseFile = "Tests/test_srvs/golden/EmptyResponse.hs"
 
 -- | ROOT TEST
 
@@ -144,5 +157,6 @@ tests =
                  sequence [testActionMsgs
                           , testStringMsg
                           , addTwoIntsServiceMD5
-                          , addTwoIntsGen]
+                          , addTwoIntsGen
+                          , emptySrv]
      return testList
