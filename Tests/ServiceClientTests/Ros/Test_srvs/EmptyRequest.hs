@@ -15,7 +15,7 @@ data EmptyRequest = EmptyRequest deriving (P.Show, P.Eq, P.Ord, T.Typeable, G.Ge
 
 instance RosBinary EmptyRequest where
   put _  = putUnit
-  get = getUnit *> pure EmptyRequest
+  get = pure EmptyRequest
 
 instance Storable EmptyRequest where
   sizeOf _ = 1
