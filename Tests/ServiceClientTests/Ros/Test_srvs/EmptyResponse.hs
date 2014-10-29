@@ -11,12 +11,11 @@ import qualified Data.Default.Generics as D
 import Ros.Internal.Msg.SrvInfo
 import Foreign.Storable (Storable(..))
 
-data EmptyResponse = EmptyResponse deriving (P.Show, P.Eq, P.Ord, G.Generic)
+data EmptyResponse = EmptyResponse deriving (P.Show, P.Eq, P.Ord, T.Typeable, G.Generic)
 
 instance RosBinary EmptyResponse where
   put _  = putUnit
-  get = getUnit *> pure EmptyResponse
-  --get = pure EmptyResponse
+  get = pure EmptyResponse
 
 instance Storable EmptyResponse where
   sizeOf _ = 1

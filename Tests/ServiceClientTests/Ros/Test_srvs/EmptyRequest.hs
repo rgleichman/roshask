@@ -11,7 +11,7 @@ import qualified Data.Default.Generics as D
 import Ros.Internal.Msg.SrvInfo
 import Foreign.Storable (Storable(..))
 
-data EmptyRequest = EmptyRequest deriving (P.Show, P.Eq, P.Ord, G.Generic)
+data EmptyRequest = EmptyRequest deriving (P.Show, P.Eq, P.Ord, T.Typeable, G.Generic)
 
 instance RosBinary EmptyRequest where
   put _  = putUnit
