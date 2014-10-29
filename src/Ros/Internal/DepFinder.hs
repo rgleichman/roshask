@@ -64,7 +64,6 @@ getRosPaths =
 
 -- Packages that we will ignore for tracking down message definition
 -- dependencies.
---TODO: should std_srvs be removed from this list?
 ignoredPackages :: [String]
 ignoredPackages = ["genmsg_cpp", "rospack", "rosconsole", "rosbagmigration", 
                    "roscpp", "rospy", "roslisp", "roslib", "boost"]

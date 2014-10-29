@@ -14,7 +14,7 @@ import Foreign.Storable (Storable(..))
 data EmptyResponse = EmptyResponse deriving (P.Show, P.Eq, P.Ord, T.Typeable, G.Generic)
 
 instance RosBinary EmptyResponse where
-  put _  = putUnit
+  put _  = pure ()
   get = pure EmptyResponse
 
 instance Storable EmptyResponse where

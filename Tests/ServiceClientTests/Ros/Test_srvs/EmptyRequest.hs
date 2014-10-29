@@ -14,7 +14,7 @@ import Foreign.Storable (Storable(..))
 data EmptyRequest = EmptyRequest deriving (P.Show, P.Eq, P.Ord, T.Typeable, G.Generic)
 
 instance RosBinary EmptyRequest where
-  put _  = putUnit
+  put _  = pure ()
   get = pure EmptyRequest
 
 instance Storable EmptyRequest where
